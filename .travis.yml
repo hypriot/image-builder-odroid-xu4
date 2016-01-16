@@ -1,0 +1,15 @@
+sudo: required
+services:
+  - docker
+language: bash
+script:
+  - make sd-image
+deploy:
+  provider: releases
+  api_key:
+    secure: EeG6bBTYjs97qXKm1BOEhNQ11asUL4842vFXKUcObWniBuARKoUMTK8yfQ35kIsMMm1XQqm6yt4MIQJqhTHOGMFder0acJ/iNYMADpOCKkzwe6hfLA/y1+6rdy/XKFr1qnx6TgU+Sxchw6GBAmva2V1ycunReS+R0UruNTp+QV6OlwcVvm2zLRuzljMzvVshQr0CBKb1FFA6slfzXyobUonSGNQuXaNk2L+JrWWbypp6IsTWwOEQKXAxj19O+xD5urPkqI6FXcI12JwNSMHjAABnwk/XRvwyI93GP2wfbHX3USUN4vXz9v7yxheMNFijcQNwtkXTB1gIGXqy21VxAXMXTHg/VDTDcw41W0gK4VOs/sM4D1pMfk6qLx5vOYRdMGjMmbKELegbfnaTZMbSxYCcovMj+sNkwoJ6DVoOByRIZIhIexopnT5MHBK8FvfmpxwvQWwjkQBvtlrYLGLZw555ErVWXB8o7ICF7nX+hQ5102617fK+P0BM0O0yN2Df6+CFkAxx0d+DG6PbbNM53sqdYK10lADRLvLqK+YMZ7oqKHH7aAtQJ5BLbe6oWbMGjV1VLys5q3qzNNi6P+whJ5M2MQw/6YdIqPEWL6Q0aS9Q6JD63H69/NQoGqVxoRQ43jcJaXucy8LG7+hiEyziN3C5QGTjyhWuUySb49fHAv4=
+  file: 
+    - sd-card-odroid-xu4.img.zip
+  on:
+    tags: true
+    repo: hypriot/image-builder-odroid-xu4
