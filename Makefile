@@ -8,3 +8,6 @@ sd-image: build
 
 shell: build
 	docker run -ti --privileged -v $(shell pwd):/workspace -v /boot:/boot -v /lib/modules:/lib/modules image-builder-odroid-xu4 bash
+
+testshell: build
+	docker run -ti --privileged -v $(shell pwd)/builder:/builder -v $(shell pwd):/workspace -v /boot:/boot -v /lib/modules:/lib/modules image-builder-odroid-xu4 bash
