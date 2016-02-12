@@ -1,21 +1,16 @@
-require 'serverspec'
-set :backend, :exec
+require_relative 'spec_helper'
 
 describe "SD-Card Image" do
-  let(:image_path) { return '/sd-card-odroid-xu4.img' }
-
   it "exists" do
     image_file = file(image_path)
-
     expect(image_file).to exist
   end
 
   context "Partition table" do
-    let(:stdout) { command("guestfish add #{image_path} : run : list-filesystems").stdout }
+    let(:stdout) { run("list-filesystems").stdout }
 
     it "has one partition" do
       partitions = stdout.split(/\r?\n/)
-
       expect(partitions.size).to be 1
     end
 

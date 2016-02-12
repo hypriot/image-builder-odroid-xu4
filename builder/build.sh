@@ -1,5 +1,5 @@
-#!/bin/bash -e
-set -x
+#!/bin/bash
+set -ex
 # This script should be run only inside of a Docker container
 if [ ! -f /.dockerinit ]; then
   echo "ERROR: script works only in a Docker container!"
@@ -8,22 +8,29 @@ fi
 
 ### setting up some important variables to control the build process
 
-# device specific settings
-IMAGE_NAME="sd-card-odroid-xu4.img"
-IMAGE_ROOTFS_PATH="/image-rootfs.tar.gz"
-QEMU_ARCH="arm"
-
 # where to store our created sd-image file
 BUILD_RESULT_PATH="/workspace"
 BUILD_PATH="/build"
 
 # where to store our base file system
-ROOTFS_TAR="rootfs-armhf.tar.gz"
+HYPRIOT_OS_VERSION="v0.7.1"
+ROOTFS_TAR="rootfs-armhf-${HYPRIOT_OS_VERSION}.tar.gz"
 ROOTFS_TAR_PATH="$BUILD_RESULT_PATH/$ROOTFS_TAR"
-ROOTFS_TAR_VERSION="v0.5"
 
 # size of root and boot partion
 ROOT_PARTITION_SIZE="800M"
+
+# device specific settings
+HYPRIOT_IMAGE_VERSION=${VERSION:="dirty"}
+HYPRIOT_IMAGE_NAME="sd-card-odroid-xu4-${HYPRIOT_IMAGE_VERSION}.img"
+IMAGE_ROOTFS_PATH="/image-rootfs.tar.gz"
+QEMU_ARCH="arm"
+export HYPRIOT_IMAGE_VERSION
+
+# specific versions of kernel/firmware and docker tools
+export DOCKER_ENGINE_VERSION="1.9.1-1"
+export DOCKER_COMPOSE_VERSION="1.5.2-80"
+export DOCKER_MACHINE_VERSION="0.4.1-72"
 
 # create build directory for assembling our image filesystem
 rm -rf $BUILD_PATH
@@ -31,7 +38,7 @@ mkdir -p $BUILD_PATH
 
 # download our base root file system
 if [ ! -f $ROOTFS_TAR_PATH ]; then
-  wget -q -O $ROOTFS_TAR_PATH https://github.com/hypriot/os-rootfs/releases/download/$ROOTFS_TAR_VERSION/$ROOTFS_TAR
+  wget -q -O $ROOTFS_TAR_PATH https://github.com/hypriot/os-rootfs/releases/download/$HYPRIOT_OS_VERSION/$ROOTFS_TAR
 fi
 
 # extract root file system
@@ -75,12 +82,12 @@ tar -czf $IMAGE_ROOTFS_PATH -C $BUILD_PATH .
 
 #FIXME: use latest upstream u-boot files from hardkernel
 # download current bootloader/u-boot images from hardkernel
-wget -q https://raw.githubusercontent.com/mdrjr/c1_uboot_binaries/master/bl1.bin.hardkernel
-wget -q https://raw.githubusercontent.com/mdrjr/c1_uboot_binaries/master/u-boot.bin
+wget -q https://raw.githubusercontent.com/mdrjr/xu4_uboot_binaries/master/bl1.bin.hardkernel
+wget -q https://raw.githubusercontent.com/mdrjr/xu4_uboot_binaries/master/u-boot.bin
 
 guestfish <<EOF
 # create new image disk
-sparse /$IMAGE_NAME $ROOT_PARTITION_SIZE
+sparse /$HYPRIOT_IMAGE_NAME $ROOT_PARTITION_SIZE
 run
 part-init /dev/sda mbr
 part-add /dev/sda primary 3072 -1
@@ -103,13 +110,13 @@ copy-file-to-device /boot/u-boot.bin /dev/sda destoffset:32768 sparse:true
 EOF
 
 # log image partioning
-fdisk -l /$IMAGE_NAME
+fdisk -l "/$HYPRIOT_IMAGE_NAME"
 
 # ensure that the travis-ci user can access the sd-card image file
 umask 0000
 
 # compress image
-pigz --zip -c $IMAGE_NAME > $BUILD_RESULT_PATH/$IMAGE_NAME.zip
+pigz --zip -c "$HYPRIOT_IMAGE_NAME" > "$BUILD_RESULT_PATH/$HYPRIOT_IMAGE_NAME.zip"
 
 # test sd-image that we have built
-rspec --format documentation --color /builder/test
+VERSION=${HYPRIOT_IMAGE_VERSION} rspec --format documentation --color /builder/test
