@@ -1,11 +1,11 @@
-#!/bin/bash -e
-set -x
+#!/bin/bash
+set -ex
 
 # sd card device name for ODROID XU4
 SDCARD_DEVICE="/dev/mmcblk0"
 
 # install parted, if its not there
-if [ -z $(which parted) ]; then
+if [ -z "$(which parted)" ]; then
   apt-get update
   apt-get install -y parted
 fi
@@ -15,15 +15,15 @@ df -h
 
 # get partition number
 PART_NUM=$(parted $SDCARD_DEVICE -ms unit s p | tail -n 1 | cut -f 1 -d:)
-echo $PART_NUM
+echo "$PART_NUM"
 
 # get partition start sector
-PART_START=$(parted $SDCARD_DEVICE -ms unit s p | grep ^$PART_NUM | cut -f 2 -d:)
-echo $PART_START
+PART_START=$(parted $SDCARD_DEVICE -ms unit s p | grep "^$PART_NUM" | cut -f 2 -d:)
+echo "$PART_START"
 
 # remove trailing "s"
 PART_START=${PART_START::-1}
-echo $PART_START
+echo "$PART_START"
 
 # change partition table for resizing to maximum
 set +e
@@ -43,7 +43,7 @@ set -e
 
 # apply online resizing
 partprobe
-/sbin/resize2fs ${SDCARD_DEVICE}p${PART_NUM}
+/sbin/resize2fs "${SDCARD_DEVICE}p${PART_NUM}"
 
 # show disk usage after changes
 df -h
