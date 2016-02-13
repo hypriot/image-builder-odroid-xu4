@@ -110,7 +110,6 @@ upload bl1.bin.hardkernel /boot/bl1.bin.hardkernel
 upload bl2.bin.hardkernel /boot/bl2.bin.hardkernel
 upload u-boot.bin.hardkernel /boot/u-boot.bin
 upload tzsw.bin.hardkernel /boot/tzsw.bin.hardkernel
-upload /builder/boot.ini /boot/boot.ini
 copy-file-to-device /boot/bl1.bin.hardkernel /dev/sda destoffset:512
 copy-file-to-device /boot/bl2.bin.hardkernel /dev/sda destoffset:15872
 copy-file-to-device /boot/u-boot.bin /dev/sda destoffset:32256
