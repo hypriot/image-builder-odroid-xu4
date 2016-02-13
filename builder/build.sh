@@ -17,9 +17,6 @@ HYPRIOT_OS_VERSION="v0.7.2"
 ROOTFS_TAR="rootfs-armhf-${HYPRIOT_OS_VERSION}.tar.gz"
 ROOTFS_TAR_PATH="$BUILD_RESULT_PATH/$ROOTFS_TAR"
 
-# size of root and boot partion
-ROOT_PARTITION_SIZE="800M"
-
 # device specific settings
 HYPRIOT_IMAGE_VERSION=${VERSION:="dirty"}
 HYPRIOT_IMAGE_NAME="sd-card-odroid-xu4-${HYPRIOT_IMAGE_VERSION}.img"
@@ -32,9 +29,51 @@ export DOCKER_ENGINE_VERSION="1.10.1-1"
 export DOCKER_COMPOSE_VERSION="1.6.0-27"
 export DOCKER_MACHINE_VERSION="0.4.1-72"
 
+# size of root and boot partion (in MByte)
+ROOT_PARTITION_START="3072"
+ROOT_PARTITION_SIZE="800"
+#---don't change here---
+ROOT_PARTITION_OFFSET="$((ROOT_PARTITION_START*512))"
+#---don't change here---
+
 # create build directory for assembling our image filesystem
 rm -rf $BUILD_PATH
-mkdir -p $BUILD_PATH
+mkdir -p $BUILD_PATH/{boot,root}
+
+#---create image file---
+dd if=/dev/zero of="/$HYPRIOT_IMAGE_NAME" bs=1MiB count=$ROOT_PARTITION_SIZE
+echo -e "o\nn\np\n1\n${ROOT_PARTITION_START}\n\nw\n" | fdisk "/$HYPRIOT_IMAGE_NAME"
+#-partition #1 - Type=83 Linux
+losetup -d /dev/loop0 || /bin/true
+losetup --offset $ROOT_PARTITION_OFFSET /dev/loop0 "/$HYPRIOT_IMAGE_NAME"
+mkfs.ext4 -O ^has_journal -b 4096 -L rootfs -U e139ce78-9841-40fe-8823-96a304a09859 /dev/loop0
+losetup -d /dev/loop0
+sleep 3
+#-test mount and write a file
+mount -t ext4 -o loop=/dev/loop0,offset=$ROOT_PARTITION_OFFSET "/$HYPRIOT_IMAGE_NAME" $BUILD_PATH/root
+echo "HypriotOS: root partition" > $BUILD_PATH/root/root.txt
+tree -a $BUILD_PATH/
+df -h
+umount $BUILD_PATH/root
+#---create image file---
+
+# log image partioning
+fdisk -l "/$HYPRIOT_IMAGE_NAME"
+losetup
+
+#---flash bootloader---
+# download current bootloader/u-boot images from hardkernel
+# (this one is able to boot from a EXT4 file system)
+_commit=814386d3e43b8ab8d81f04aa7fe402952503d8fe
+wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/bl1.bin
+wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/bl2.bin
+wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/u-boot.bin
+wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/tzsw.bin
+dd conv=notrunc if=bl1.bin of="/$HYPRIOT_IMAGE_NAME" seek=1
+dd conv=notrunc if=bl2.bin of="/$HYPRIOT_IMAGE_NAME" seek=31
+dd conv=notrunc if=u-boot.bin of="/$HYPRIOT_IMAGE_NAME" seek=63
+dd conv=notrunc if=tzsw.bin of="/$HYPRIOT_IMAGE_NAME" seek=719
+#---flash bootloader---
 
 # download our base root file system
 if [ ! -f $ROOTFS_TAR_PATH ]; then
@@ -71,50 +110,12 @@ umount -l $BUILD_PATH/dev || true
 # package image rootfs
 tar -czf $IMAGE_ROOTFS_PATH -C $BUILD_PATH .
 
-# create the image and add a single ext4 filesystem
-# --- important settings for ODROID SD card
-# - initialise the partion with MBR
-# - use start sector 3072, this reserves 1.5MByte of disk space
-# - don't set the partition to "bootable"
-# - format the disk with ext4
-# for debugging use 'set-verbose true'
-#set-verbose true
-
-#FIXME: use latest upstream u-boot files from hardkernel
-# download current bootloader/u-boot images from hardkernel
-wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/sd_fusing.sh
-chmod +x sd_fusing.sh
-wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/bl1.bin.hardkernel
-wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/bl2.bin.hardkernel
-wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/u-boot.bin.hardkernel
-wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/tzsw.bin.hardkernel
-
-guestfish <<EOF
-# create new image disk
-sparse /$HYPRIOT_IMAGE_NAME $ROOT_PARTITION_SIZE
-run
-part-init /dev/sda mbr
-part-add /dev/sda primary 3072 -1
-part-set-bootable /dev/sda 1 false
-mkfs ext4 /dev/sda1
-
-# import base rootfs
-mount /dev/sda1 /
-tar-in $IMAGE_ROOTFS_PATH / compress:gzip
-
-#FIXME: use dd to directly writing u-boot to image file
-#FIXME2: later on, create a dedicated .deb package to install/update u-boot
-# write bootloader and u-boot into image start sectors 0-3071
-upload sd_fusing.sh /boot/sd_fusing.sh
-upload bl1.bin.hardkernel /boot/bl1.bin.hardkernel
-upload bl2.bin.hardkernel /boot/bl2.bin.hardkernel
-upload u-boot.bin.hardkernel /boot/u-boot.bin
-upload tzsw.bin.hardkernel /boot/tzsw.bin.hardkernel
-copy-file-to-device /boot/bl1.bin.hardkernel /dev/sda destoffset:512
-copy-file-to-device /boot/bl2.bin.hardkernel /dev/sda destoffset:15872
-copy-file-to-device /boot/u-boot.bin /dev/sda destoffset:32256
-copy-file-to-device /boot/tzsw.bin.hardkernel /dev/sda destoffset:368128
-EOF
+#---copy rootfs to image file---
+mount -t ext4 -o loop=/dev/loop0,offset=$ROOT_PARTITION_OFFSET "/$HYPRIOT_IMAGE_NAME" $BUILD_PATH/root
+tar -xzf $IMAGE_ROOTFS_PATH -C $BUILD_PATH/root
+df -h
+umount $BUILD_PATH/root
+#---copy rootfs to image file---
 
 # log image partioning
 fdisk -l "/$HYPRIOT_IMAGE_NAME"

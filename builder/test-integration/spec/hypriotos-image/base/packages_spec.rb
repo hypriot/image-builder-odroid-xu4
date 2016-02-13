@@ -51,7 +51,7 @@ end
 describe package('initramfs-tools') do
   it { should be_installed }
 end
-describe package('linux-image-xu4') do
+describe package('linux-image-3.10.92-67') do
   it { should be_installed }
 end
 

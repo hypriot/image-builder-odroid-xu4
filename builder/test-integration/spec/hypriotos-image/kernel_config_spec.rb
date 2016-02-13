@@ -32,7 +32,7 @@ describe command('zcat /proc/config.gz') do
   its(:stdout) { should match /CONFIG_MEMCG=y/ }
   its(:stdout) { should match /CONFIG_MACVLAN=m/ }
   its(:stdout) { should match /CONFIG_VETH=m/ }
-  its(:stdout) { should match /CONFIG_BRIDGE=y/ }
+  its(:stdout) { should match /CONFIG_BRIDGE=m/ }
   its(:stdout) { should match /CONFIG_BRIDGE_NETFILTER=y/ }
   its(:stdout) { should match /CONFIG_NF_NAT_IPV4=m/ }
   its(:stdout) { should match /CONFIG_IP_NF_FILTER=m/ }
@@ -69,7 +69,7 @@ describe command('zcat /proc/config.gz') do
   its(:stdout) { should match /CONFIG_EXT4_FS_SECURITY=y/ }
 
   ## Storage Drivers:
-  its(:stdout) { should match /CONFIG_AUFS_FS=y/ }
+  its(:stdout) { should match /CONFIG_AUFS_FS=m/ }
   its(:stdout) { should match /CONFIG_BTRFS_FS=m/ }
   its(:stdout) { should match /CONFIG_BLK_DEV_DM=y/ }
   its(:stdout) { should match /CONFIG_DM_THIN_PROVISIONING=m/ }
