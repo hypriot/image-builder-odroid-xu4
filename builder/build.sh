@@ -82,8 +82,8 @@ tar -czf $IMAGE_ROOTFS_PATH -C $BUILD_PATH .
 
 #FIXME: use latest upstream u-boot files from hardkernel
 # download current bootloader/u-boot images from hardkernel
-wget -q https://raw.githubusercontent.com/mdrjr/xu4_uboot_binaries/master/bl1.bin.hardkernel
-wget -q https://raw.githubusercontent.com/mdrjr/xu4_uboot_binaries/master/u-boot.bin
+wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/bl1.bin.hardkernel
+wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/u-boot.bin.hardkernel
 
 guestfish <<EOF
 # create new image disk
@@ -102,7 +102,7 @@ tar-in $IMAGE_ROOTFS_PATH / compress:gzip
 #FIXME2: later on, create a dedicated .deb package to install/update u-boot
 # write bootloader and u-boot into image start sectors 0-3071
 upload bl1.bin.hardkernel /boot/bl1.bin.hardkernel
-upload u-boot.bin /boot/u-boot.bin
+upload u-boot.bin.hardkernel /boot/u-boot.bin
 upload /builder/boot.ini /boot/boot.ini
 copy-file-to-device /boot/bl1.bin.hardkernel /dev/sda size:442 sparse:true
 copy-file-to-device /boot/bl1.bin.hardkernel /dev/sda srcoffset:512 destoffset:512 sparse:true

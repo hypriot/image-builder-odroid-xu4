@@ -7,11 +7,6 @@ HYPRIOT_DEVICE="ODROID XU4"
 # set up /etc/resolv.conf
 echo "nameserver 8.8.8.8" > /etc/resolv.conf
 
-# set up ODROID repository
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys AB19BAC9
-echo "deb http://deb.odroid.in/xu4/ trusty main" > /etc/apt/sources.list.d/odroid.list
-echo "deb http://deb.odroid.in/ trusty main" >> /etc/apt/sources.list.d/odroid.list
-
 # set up Hypriot Schatzkiste repository
 wget -q https://packagecloud.io/gpg.key -O - | apt-key add -
 echo 'deb https://packagecloud.io/Hypriot/Schatzkiste/debian/ wheezy main' > /etc/apt/sources.list.d/hypriot.list
@@ -47,8 +42,12 @@ systemctl enable docker
 apt-get install -y u-boot-tools initramfs-tools
 
 # make the kernel package create a copy of the current kernel here
-touch /boot/uImage
-apt-get install -y linux-image-xu4
+apt-get -q=2 -y install initramfs-tools
+curl -sSL http://deb.odroid.in/5422/pool/main/b/bootini/bootini_20151220-14_armhf.deb >/tmp/bootini.deb
+curl -sSL http://deb.odroid.in/umiddelb/linux-image-3.10.92-67_20151123_armhf.deb >/tmp/linux-image-3.10.92-67_20151123_armhf.deb
+mkdir -p /media/boot
+dpkg -i /tmp/bootini.deb /tmp/linux-image-3.10.92-67_20151123_armhf.deb
+rm -f /tmp/bootini.deb /tmp/linux-image-3.10.92-67_20151123_armhf.deb
 
 # set device label and version number
 echo "HYPRIOT_DEVICE=\"$HYPRIOT_DEVICE\"" >> /etc/os-release
