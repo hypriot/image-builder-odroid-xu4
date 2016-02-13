@@ -33,7 +33,7 @@ export DOCKER_MACHINE_VERSION="0.4.1-72"
 ROOT_PARTITION_START="3072"
 ROOT_PARTITION_SIZE="800"
 #---don't change here---
-ROOT_PARTITION_OFFSET="$(($ROOT_PARTITION_START*512))"
+ROOT_PARTITION_OFFSET="$((ROOT_PARTITION_START*512))"
 #---don't change here---
 
 # create build directory for assembling our image filesystem
@@ -41,16 +41,16 @@ rm -rf $BUILD_PATH
 mkdir -p $BUILD_PATH/{boot,root}
 
 #---create image file---
-dd if=/dev/zero of=/$HYPRIOT_IMAGE_NAME bs=1MiB count=$ROOT_PARTITION_SIZE
-echo -e "o\nn\np\n1\n${ROOT_PARTITION_START}\n\nw\n" | fdisk /$HYPRIOT_IMAGE_NAME
+dd if=/dev/zero of="/$HYPRIOT_IMAGE_NAME" bs=1MiB count=$ROOT_PARTITION_SIZE
+echo -e "o\nn\np\n1\n${ROOT_PARTITION_START}\n\nw\n" | fdisk "/$HYPRIOT_IMAGE_NAME"
 #-partition #1 - Type=83 Linux
 losetup -d /dev/loop0 || /bin/true
-losetup --offset $ROOT_PARTITION_OFFSET /dev/loop0 /$HYPRIOT_IMAGE_NAME
+losetup --offset $ROOT_PARTITION_OFFSET /dev/loop0 "/$HYPRIOT_IMAGE_NAME"
 mkfs.ext4 -O ^has_journal -b 4096 -L rootfs -U e139ce78-9841-40fe-8823-96a304a09859 /dev/loop0
 losetup -d /dev/loop0
 sleep 3
 #-test mount and write a file
-mount -t ext4 -o loop=/dev/loop0,offset=$ROOT_PARTITION_OFFSET /$HYPRIOT_IMAGE_NAME $BUILD_PATH/root
+mount -t ext4 -o loop=/dev/loop0,offset=$ROOT_PARTITION_OFFSET "/$HYPRIOT_IMAGE_NAME" $BUILD_PATH/root
 echo "HypriotOS: root partition" > $BUILD_PATH/root/root.txt
 tree -a $BUILD_PATH/
 df -h
@@ -58,7 +58,7 @@ umount $BUILD_PATH/root
 #---create image file---
 
 # log image partioning
-fdisk -l /$HYPRIOT_IMAGE_NAME
+fdisk -l "/$HYPRIOT_IMAGE_NAME"
 losetup
 
 #---flash bootloader---
@@ -69,10 +69,10 @@ wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/preb
 wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/bl2.bin
 wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/u-boot.bin
 wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/tzsw.bin
-dd conv=notrunc if=bl1.bin of=/$HYPRIOT_IMAGE_NAME seek=1
-dd conv=notrunc if=bl2.bin of=/$HYPRIOT_IMAGE_NAME seek=31
-dd conv=notrunc if=u-boot.bin of=/$HYPRIOT_IMAGE_NAME seek=63
-dd conv=notrunc if=tzsw.bin of=/$HYPRIOT_IMAGE_NAME seek=719
+dd conv=notrunc if=bl1.bin of="/$HYPRIOT_IMAGE_NAME" seek=1
+dd conv=notrunc if=bl2.bin of="/$HYPRIOT_IMAGE_NAME" seek=31
+dd conv=notrunc if=u-boot.bin of="/$HYPRIOT_IMAGE_NAME" seek=63
+dd conv=notrunc if=tzsw.bin of="/$HYPRIOT_IMAGE_NAME" seek=719
 #---flash bootloader---
 
 # download our base root file system
@@ -111,7 +111,7 @@ umount -l $BUILD_PATH/dev || true
 tar -czf $IMAGE_ROOTFS_PATH -C $BUILD_PATH .
 
 #---copy rootfs to image file---
-mount -t ext4 -o loop=/dev/loop0,offset=$ROOT_PARTITION_OFFSET /$HYPRIOT_IMAGE_NAME $BUILD_PATH/root
+mount -t ext4 -o loop=/dev/loop0,offset=$ROOT_PARTITION_OFFSET "/$HYPRIOT_IMAGE_NAME" $BUILD_PATH/root
 tar -xzf $IMAGE_ROOTFS_PATH -C $BUILD_PATH/root
 df -h
 umount $BUILD_PATH/root
