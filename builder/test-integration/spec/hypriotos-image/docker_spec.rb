@@ -6,7 +6,7 @@ end
 
 describe command('dpkg -l docker-hypriot') do
   its(:stdout) { should match /ii  docker-hypriot/ }
-  its(:stdout) { should match /1.9.1-1/ }
+  its(:stdout) { should match /1.10.1-1/ }
   its(:exit_status) { should eq 0 }
 end
 
@@ -35,7 +35,7 @@ end
 
 describe file('/var/lib/docker') do
   it { should be_directory }
-  it { should be_mode 700 }
+  it { should be_mode 701 }
   it { should be_owned_by 'root' }
 end
 
@@ -47,13 +47,13 @@ describe file('/etc/bash_completion.d/docker') do
 end
 
 describe command('docker -v') do
-  its(:stdout) { should match /Docker version 1.9.1, build/ }
+  its(:stdout) { should match /Docker version 1.10.1, build/ }
   its(:exit_status) { should eq 0 }
 end
 
 describe command('docker version') do
-  its(:stdout) { should match /Client:. Version:      1.9.1. API version:  1.21/m }
-  its(:stdout) { should match /Server:. Version:      1.9.1. API version:  1.21/m }
+  its(:stdout) { should match /Client:. Version:      1.10.1. API version:  1.22/m }
+  its(:stdout) { should match /Server:. Version:      1.10.1. API version:  1.22/m }
   its(:exit_status) { should eq 0 }
 end
 

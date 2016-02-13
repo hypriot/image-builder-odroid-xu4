@@ -28,8 +28,8 @@ QEMU_ARCH="arm"
 export HYPRIOT_IMAGE_VERSION
 
 # specific versions of kernel/firmware and docker tools
-export DOCKER_ENGINE_VERSION="1.9.1-1"
-export DOCKER_COMPOSE_VERSION="1.5.2-80"
+export DOCKER_ENGINE_VERSION="1.10.1-1"
+export DOCKER_COMPOSE_VERSION="1.6.0-27"
 export DOCKER_MACHINE_VERSION="0.4.1-72"
 
 # create build directory for assembling our image filesystem
