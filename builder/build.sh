@@ -82,8 +82,12 @@ tar -czf $IMAGE_ROOTFS_PATH -C $BUILD_PATH .
 
 #FIXME: use latest upstream u-boot files from hardkernel
 # download current bootloader/u-boot images from hardkernel
+wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/sd_fusing.sh
+chmod +x sd_fusing.sh
 wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/bl1.bin.hardkernel
+wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/bl2.bin.hardkernel
 wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/u-boot.bin.hardkernel
+wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/tzsw.bin.hardkernel
 
 guestfish <<EOF
 # create new image disk
@@ -101,12 +105,16 @@ tar-in $IMAGE_ROOTFS_PATH / compress:gzip
 #FIXME: use dd to directly writing u-boot to image file
 #FIXME2: later on, create a dedicated .deb package to install/update u-boot
 # write bootloader and u-boot into image start sectors 0-3071
+upload sd_fusing.sh /boot/sd_fusing.sh
 upload bl1.bin.hardkernel /boot/bl1.bin.hardkernel
+upload bl2.bin.hardkernel /boot/bl2.bin.hardkernel
 upload u-boot.bin.hardkernel /boot/u-boot.bin
+upload tzsw.bin.hardkernel /boot/tzsw.bin.hardkernel
 upload /builder/boot.ini /boot/boot.ini
-copy-file-to-device /boot/bl1.bin.hardkernel /dev/sda size:442 sparse:true
-copy-file-to-device /boot/bl1.bin.hardkernel /dev/sda srcoffset:512 destoffset:512 sparse:true
-copy-file-to-device /boot/u-boot.bin /dev/sda destoffset:32768 sparse:true
+copy-file-to-device /boot/bl1.bin.hardkernel /dev/sda destoffset:512
+copy-file-to-device /boot/bl2.bin.hardkernel /dev/sda destoffset:15872
+copy-file-to-device /boot/u-boot.bin /dev/sda destoffset:32256
+copy-file-to-device /boot/tzsw.bin.hardkernel /dev/sda destoffset:368128
 EOF
 
 # log image partioning
