@@ -42,10 +42,10 @@ systemctl enable docker
 apt-get install -y u-boot-tools initramfs-tools
 
 # make the kernel package create a copy of the current kernel here
-apt-get -q=2 -y install initramfs-tools
-curl -sSL http://deb.odroid.in/5422/pool/main/b/bootini/bootini_20151220-14_armhf.deb >/tmp/bootini.deb
-curl -sSL http://deb.odroid.in/umiddelb/linux-image-3.10.92-67_20151123_armhf.deb >/tmp/linux-image-3.10.92-67_20151123_armhf.deb
 mkdir -p /media/boot
+apt-get install -y initramfs-tools
+wget -q -O /tmp/bootini.deb http://deb.odroid.in/5422/pool/main/b/bootini/bootini_20151220-14_armhf.deb
+wget -q -O /tmp/linux-image-3.10.92-67_20151123_armhf.deb http://deb.odroid.in/umiddelb/linux-image-3.10.92-67_20151123_armhf.deb
 dpkg -i /tmp/bootini.deb /tmp/linux-image-3.10.92-67_20151123_armhf.deb
 rm -f /tmp/bootini.deb /tmp/linux-image-3.10.92-67_20151123_armhf.deb
 
