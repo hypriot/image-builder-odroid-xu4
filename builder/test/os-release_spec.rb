@@ -32,8 +32,8 @@ describe "Root filesystem" do
     expect(stdout).to contain('HYPRIOT_OS="HypriotOS/armhf"')
   end
 
-  it "is for device 'HYPRIOT_DEVICE=\"ODROID XU4\"'" do
-    expect(stdout).to contain('HYPRIOT_DEVICE="ODROID XU4"')
+  it "is for device 'HYPRIOT_DEVICE=\"ODROID XU3/XU4\"'" do
+    expect(stdout).to contain('HYPRIOT_DEVICE="ODROID XU3/XU4"')
   end
 
   it "uses os-rootfs version 'HYPRIOT_OS_VERSION=\"v0.7.1\"'" do
