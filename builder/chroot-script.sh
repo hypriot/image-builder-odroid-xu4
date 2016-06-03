@@ -45,7 +45,7 @@ apt-get install -y u-boot-tools initramfs-tools
 #-don't create /media/boot, then all files will be installed in /boot
 #mkdir -p /media/boot
 apt-get install -y initramfs-tools
-wget -q -O /tmp/bootini.deb http://deb.odroid.in/5422/pool/main/b/bootini/bootini_20151220-14_armhf.deb
+wget -q -O /tmp/bootini.deb http://deb.odroid.in/5422/pool/main/b/bootini/bootini_20160412-15_armhf.deb 
 wget -q -O /tmp/linux-image-3.10.92-67_20151123_armhf.deb http://deb.odroid.in/umiddelb/linux-image-3.10.92-67_20151123_armhf.deb
 dpkg -i /tmp/bootini.deb /tmp/linux-image-3.10.92-67_20151123_armhf.deb
 rm -f /tmp/bootini.deb /tmp/linux-image-3.10.92-67_20151123_armhf.deb
