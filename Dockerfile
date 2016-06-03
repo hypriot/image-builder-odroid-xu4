@@ -28,8 +28,6 @@ RUN gem update --system && \
     gem install --no-document pry-byebug && \
     gem install --no-document bundler
 
-RUN touch /.dockerinit
-
 COPY builder/ /builder/
 
 # build sd card image
