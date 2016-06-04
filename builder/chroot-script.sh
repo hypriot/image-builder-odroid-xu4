@@ -21,7 +21,8 @@ apt-get update
 apt-get install -y \
   "docker-hypriot=${DOCKER_ENGINE_VERSION}" \
   "docker-compose=${DOCKER_COMPOSE_VERSION}" \
-  "docker-machine=${DOCKER_MACHINE_VERSION}"
+  "docker-machine=${DOCKER_MACHINE_VERSION}" \
+  "device-init=${DEVICE_INIT_VERSION}"
 
 #FIXME: should be handled in .deb package
 # setup Docker default configuration for ODROID xu4
