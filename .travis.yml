@@ -14,7 +14,7 @@ deploy:
   api_key:
    secure: "kMrJOv7xDzwBm2RaJTuOrZdPNALIDCuIGwIFheTmNRGwBT+kVf0IYQxV6z2OJrV24FDqwaCcxRSXkPd9vMvB6Wsoi21HwJil3/cbo1gDX+BhXLXzBucuSrdFU2o7l7vrINgqLM7XBJr345qA6PZorp4mval0YGaCa5dL1vXc4R1+SKjXhwg8rkL177UVCqmvzEmQLfoPbfB1LubvGkbGG4MtpvJqyfTuSSfYd7OKk5Njogrsh75fp7tENzRBZITu9GMziuiSuwN0YkOAoE4ne//E09GyZKHgm6jDdqS7KRIpXH5ipCbmW5NT8GhEKqIPtmmucT8BIHTfhiztJ8TVkOKa4pSBfNtggp1TyfS6paP9P6XDargng5NSPCfQyYtT5T0h51f+Y21Cov2dGeFF/rTzXGQJmbK+LFUuqYKjV6Ww8KNTT7z2tpXBgf7Ho6W8rwNGTu/3y5Z2PZjqSVfR1M3AVTXmDBzOVDOtwW4bJIYc7H2fXLK9UZTUMdcMdpTg+4CHo70oPm6LoWAa1t13noCLAN3Q4NgLBo/BmPtqtkjO7Njhb9QscEqVOt9cs5/n5PfMYWpvEslPGeizSUMJvhNa/Pe3pQY4/tcN0R3a5VU7O4yVz0UCrRJpbUgRCLMaAKwtnHDHU4kO5dx83jxverR7dsK7VseKd6TKLbl1A/A="
   file:
-    - sd-card-odroid-xu4-${TRAVIS_TAG}.img.zip
+    - hypriotos-odroid-xu4-${TRAVIS_TAG}.img.zip
   on:
     tags: true
     repo: hypriot/image-builder-odroid-xu4

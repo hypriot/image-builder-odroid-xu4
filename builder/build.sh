@@ -19,7 +19,7 @@ ROOTFS_TAR_PATH="$BUILD_RESULT_PATH/$ROOTFS_TAR"
 
 # device specific settings
 HYPRIOT_IMAGE_VERSION=${VERSION:="dirty"}
-HYPRIOT_IMAGE_NAME="sd-card-odroid-xu4-${HYPRIOT_IMAGE_VERSION}.img"
+HYPRIOT_IMAGE_NAME="hypriotos-odroid-xu4-${HYPRIOT_IMAGE_VERSION}.img"
 IMAGE_ROOTFS_PATH="/image-rootfs.tar.gz"
 QEMU_ARCH="arm"
 export HYPRIOT_IMAGE_VERSION
