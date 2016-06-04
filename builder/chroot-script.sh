@@ -9,7 +9,7 @@ echo "nameserver 8.8.8.8" > /etc/resolv.conf
 
 # set up Hypriot Schatzkiste repository
 wget -q https://packagecloud.io/gpg.key -O - | apt-key add -
-echo 'deb https://packagecloud.io/Hypriot/Schatzkiste/debian/ wheezy main' > /etc/apt/sources.list.d/hypriot.list
+echo 'deb https://packagecloud.io/Hypriot/Schatzkiste/debian/ jessie main' > /etc/apt/sources.list.d/hypriot.list
 
 # update all apt repository lists
 export DEBIAN_FRONTEND=noninteractive
@@ -45,7 +45,7 @@ apt-get install -y u-boot-tools initramfs-tools
 #-don't create /media/boot, then all files will be installed in /boot
 #mkdir -p /media/boot
 apt-get install -y initramfs-tools
-wget -q -O /tmp/bootini.deb http://deb.odroid.in/5422/pool/main/b/bootini/bootini_20160412-15_armhf.deb 
+wget -q -O /tmp/bootini.deb http://deb.odroid.in/5422/pool/main/b/bootini/bootini_20160412-15_armhf.deb
 wget -q -O /tmp/linux-image-3.10.92-67_20151123_armhf.deb http://deb.odroid.in/umiddelb/linux-image-3.10.92-67_20151123_armhf.deb
 dpkg -i /tmp/bootini.deb /tmp/linux-image-3.10.92-67_20151123_armhf.deb
 rm -f /tmp/bootini.deb /tmp/linux-image-3.10.92-67_20151123_armhf.deb
