@@ -82,7 +82,7 @@ mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET} "/${HYPRIOT_IMA
 echo "HypriotOS: root partition" > ${BUILD_PATH}/root.txt
 tree -a ${BUILD_PATH}/
 df -h
-umount ${BUILD_PATH}/root
+umount ${BUILD_PATH}
 #---create image file---
 
 # log image partioning
