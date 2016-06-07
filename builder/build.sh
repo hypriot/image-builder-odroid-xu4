@@ -160,5 +160,6 @@ umask 0000
 pigz --zip -c "${HYPRIOT_IMAGE_NAME}" > "${BUILD_RESULT_PATH}/${HYPRIOT_IMAGE_NAME}.zip"
 cd ${BUILD_RESULT_PATH} && sha256sum "${HYPRIOT_IMAGE_NAME}.zip" > "${HYPRIOT_IMAGE_NAME}.zip.sha256" && cd -
 
+guestfish add ${HYPRIOT_IMAGE_NAME} list-filesystems || true
 # test sd-image that we have built
 VERSION=${HYPRIOT_IMAGE_VERSION} rspec --format documentation --color /builder/test
