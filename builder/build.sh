@@ -142,7 +142,7 @@ tar -czf ${IMAGE_ROOTFS_PATH} -C ${BUILD_PATH} .
 mkdir -p "${BUILD_PATH}/root"
 mount -t ext4 -o loop=/dev/loop0,offset=$((ROOT_PARTITION_OFFSET*512)) "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root/
 mkdir -p "${BUILD_PATH}/root/media/boot"
-mount -t fat16 -o loop=/dev/loop1,offset=$((BOOT_PARTITION_OFFSET*512)) "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root/media/boot
+mount -t msdos -o loop=/dev/loop1,offset=$((BOOT_PARTITION_OFFSET*512)) "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root/media/boot
 
 tar -xzf ${IMAGE_ROOTFS_PATH} -C ${BUILD_PATH}
 df -h
