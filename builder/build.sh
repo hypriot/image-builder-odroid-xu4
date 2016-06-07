@@ -42,7 +42,7 @@ ROOT_PARTITION_OFFSET=$((BOOT_PARTITION_BYTE_SIZE/512+BOOT_PARTITION_OFFSET))
 
 # create build directory for assembling our image filesystem
 rm -rf ${BUILD_PATH}
-mkdir -p ${BUILD_PATH}/{boot,root}
+mkdir -p ${BUILD_PATH}
 
 #---create image file---
 
@@ -78,8 +78,8 @@ sleep 3
 
 
 #-test mount and write a file
-mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root
-echo "HypriotOS: root partition" > ${BUILD_PATH}/root/root.txt
+mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}
+echo "HypriotOS: root partition" > ${BUILD_PATH}/root.txt
 tree -a ${BUILD_PATH}/
 df -h
 umount ${BUILD_PATH}/root
@@ -115,7 +115,7 @@ tar -xzf "${ROOTFS_TAR_PATH}" -C ${BUILD_PATH}
 update-binfmts --enable qemu-arm
 
 # set up mount points for pseudo filesystems
-mkdir -p ${BUILD_PATH}/{proc,sys,dev/pts}
+mkdir -p ${BUILD_PATH}/{proc,sys,dev/pts,media/boot}
 
 mount -o bind /dev ${BUILD_PATH}/dev
 mount -o bind /dev/pts ${BUILD_PATH}/dev/pts
@@ -139,10 +139,13 @@ umount -l ${BUILD_PATH}/dev || true
 tar -czf ${IMAGE_ROOTFS_PATH} -C ${BUILD_PATH} .
 
 #---copy rootfs to image file---
-mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root
-tar -xzf ${IMAGE_ROOTFS_PATH} -C ${BUILD_PATH}/root
+mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}
+mount -t fat16 -o loop=/dev/loop0,offset=${BOOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/media/boot
+
+tar -xzf ${IMAGE_ROOTFS_PATH} -C ${BUILD_PATH}
 df -h
-umount ${BUILD_PATH}/root
+umount ${BUILD_PATH}/media/boot
+umount ${BUILD_PATH}
 #---copy rootfs to image file---
 
 # log image partioning
