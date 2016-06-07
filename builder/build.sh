@@ -30,20 +30,42 @@ HYPRIOT_IMAGE_NAME="hypriotos-odroid-xu4-${HYPRIOT_IMAGE_VERSION}.img"
 IMAGE_ROOTFS_PATH="/image-rootfs.tar.gz"
 export HYPRIOT_IMAGE_VERSION
 
+BOOT_PARTITION_OFFSET="3072"
 # size of root and boot partion (in MByte)
-ROOT_PARTITION_START="3072"
 ROOT_PARTITION_SIZE="800"
+BOOT_PARTITION_SIZE="64"
 #---don't change here---
-ROOT_PARTITION_OFFSET="$((ROOT_PARTITION_START*512))"
+BOOT_PARTITION_BYTE_SIZE=$((${BOOT_PARTITION_SIZE}*1024*1024))
+ROOT_PARTITION_OFFSET=$((${BOOT_PARTITION_BYTE_SIZE}/512+${BOOT_PARTITION_OFFSET}))
 #---don't change here---
+
 
 # create build directory for assembling our image filesystem
 rm -rf ${BUILD_PATH}
 mkdir -p ${BUILD_PATH}/{boot,root}
 
 #---create image file---
-dd if=/dev/zero of="/${HYPRIOT_IMAGE_NAME}" bs=1MiB count=${ROOT_PARTITION_SIZE}
-echo -e "o\nn\np\n1\n${ROOT_PARTITION_START}\n\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+
+# new size (boot+root)
+dd if=/dev/zero of="/${HYPRIOT_IMAGE_NAME}" bs=1MiB count="$((${ROOT_PARTITION_SIZE}+${BOOT_PARTITION_SIZE}))"
+
+# create DOS partition Table
+echo -e "o\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+
+# Boot partition
+echo -e "n\np\n1\n${BOOT_PARTITION_OFFSET}\n+${BOOT_PARTITION_SIZE}M\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+
+# set fat16 for boot partition
+echo -e "t\n6\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+
+# new root partition
+echo -e "n\np\n2\n${ROOT_PARTITION_OFFSET}\n\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+
+# TODO
+#mount with BOOT_PARTITION_OFFSET
+#mount with ROOT_PARTITION_OFFSET
+
+
 #-partition #1 - Type=83 Linux
 losetup -d /dev/loop0 || /bin/true
 losetup --offset ${ROOT_PARTITION_OFFSET} /dev/loop0 "/${HYPRIOT_IMAGE_NAME}"
