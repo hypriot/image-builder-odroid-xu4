@@ -53,13 +53,13 @@ dd if=/dev/zero of="/${HYPRIOT_IMAGE_NAME}" bs=1MiB count="$((ROOT_PARTITION_SIZ
 echo -e "o\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
 
 # Boot partition
-echo -e "n\np\n1\n${BOOT_PARTITION_OFFSET}\n+${BOOT_PARTITION_SIZE}M\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+echo -e "n\np\n1\n${BOOT_PARTITION_OFFSET}\n+${BOOT_PARTITION_SIZE}M\np\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
 
 # set fat16 for boot partition
-echo -e "t\n6\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+echo -e "t\n6\np\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
 
 # new root partition
-echo -e "n\np\n2\n${ROOT_PARTITION_OFFSET}\n\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+echo -e "n\np\n2\n${ROOT_PARTITION_OFFSET}\n\np\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
 
 # TODO
 #mount with BOOT_PARTITION_OFFSET
