@@ -15,7 +15,7 @@ describe "SD card image" do
     end
 
     it "has a root-partition with a ext4 filesystem" do
-      expect(stdout).to contain('sda1: ext4')
+      expect(stdout).to contain('sda2: ext4')
     end
   end
 end
