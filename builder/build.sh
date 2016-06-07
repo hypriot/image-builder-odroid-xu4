@@ -63,7 +63,7 @@ echo -e "n\np\n2\n${ROOT_PARTITION_OFFSET}\n\np\nw\n" | fdisk "/${HYPRIOT_IMAGE_
 
 # format boot partition
 losetup -d /dev/loop0 || /bin/true
-losetup --offset ${BOOT_PARTITION_OFFSET} /dev/loop0 "/${HYPRIOT_IMAGE_NAME}"
+losetup --offset $((BOOT_PARTITION_OFFSET*512)) /dev/loop0 "/${HYPRIOT_IMAGE_NAME}"
 mkfs.msdos -F 16 -n HypriotOS /dev/loop0
 losetup -d /dev/loop0
 sleep 3
@@ -71,14 +71,14 @@ sleep 3
 # format root partition
 #-partition #1 - Type=83 Linux
 losetup -d /dev/loop0 || /bin/true
-losetup --offset ${ROOT_PARTITION_OFFSET} /dev/loop0 "/${HYPRIOT_IMAGE_NAME}"
+losetup --offset $((ROOT_PARTITION_OFFSET*512)) /dev/loop0 "/${HYPRIOT_IMAGE_NAME}"
 mkfs.ext4 -O ^has_journal -b 4096 -i 4096 -L root -U e139ce78-9841-40fe-8823-96a304a09859 /dev/loop0
 losetup -d /dev/loop0
 sleep 3
 
 
 #-test mount and write a file
-mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}
+mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET*512} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}
 echo "HypriotOS: root partition" > ${BUILD_PATH}/root.txt
 tree -a ${BUILD_PATH}/
 df -h
@@ -140,8 +140,8 @@ tar -czf ${IMAGE_ROOTFS_PATH} -C ${BUILD_PATH} .
 
 #---copy rootfs to image file---
 mkdir -p "${BUILD_PATH}/root"
-mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root/
-mount -t fat16 -o loop=/dev/loop0,offset=${BOOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root/media/boot
+mount -t ext4 -o loop=/dev/loop0,offset=$((ROOT_PARTITION_OFFSET*512)) "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root/
+mount -t fat16 -o loop=/dev/loop0,offset=$((BOOT_PARTITION_OFFSET*512)) "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root/media/boot
 
 tar -xzf ${IMAGE_ROOTFS_PATH} -C ${BUILD_PATH}
 df -h
