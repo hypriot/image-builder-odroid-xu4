@@ -78,7 +78,7 @@ sleep 3
 
 
 #-test mount and write a file
-mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET*512} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}
+mount -t ext4 -o loop=/dev/loop0,offset=$((ROOT_PARTITION_OFFSET*512)) "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}
 echo "HypriotOS: root partition" > ${BUILD_PATH}/root.txt
 tree -a ${BUILD_PATH}/
 df -h
