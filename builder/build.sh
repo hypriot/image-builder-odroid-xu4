@@ -61,17 +61,22 @@ echo -e "t\n6\np\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
 # new root partition
 echo -e "n\np\n2\n${ROOT_PARTITION_OFFSET}\n\np\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
 
-# TODO
-#mount with BOOT_PARTITION_OFFSET
-#mount with ROOT_PARTITION_OFFSET
+# format boot partition
+losetup -d /dev/loop0 || /bin/true
+losetup --offset ${BOOT_PARTITION_OFFSET} /dev/loop0 "/${HYPRIOT_IMAGE_NAME}"
+mkfs.msdos -F 16 -n HypriotOS /dev/loop0
+losetup -d /dev/loop0
+sleep 3
 
-
+# format root partition
 #-partition #1 - Type=83 Linux
 losetup -d /dev/loop0 || /bin/true
 losetup --offset ${ROOT_PARTITION_OFFSET} /dev/loop0 "/${HYPRIOT_IMAGE_NAME}"
-mkfs.ext4 -O ^has_journal -b 4096 -L rootfs -U e139ce78-9841-40fe-8823-96a304a09859 /dev/loop0
+mkfs.ext4 -O ^has_journal -b 4096 -i 4096 -L root -U e139ce78-9841-40fe-8823-96a304a09859 /dev/loop0
 losetup -d /dev/loop0
 sleep 3
+
+
 #-test mount and write a file
 mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root
 echo "HypriotOS: root partition" > ${BUILD_PATH}/root/root.txt
