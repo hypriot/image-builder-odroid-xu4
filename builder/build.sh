@@ -35,6 +35,7 @@ BOOT_PARTITION_OFFSET="3072"
 ROOT_PARTITION_SIZE="800"
 BOOT_PARTITION_SIZE="64"
 #---don't change here---
+BOOT_PARTITION_BYTE_SIZE=$((BOOT_PARTITION_SIZE*1024*1024))
 ROOT_PARTITION_OFFSET=$((BOOT_PARTITION_BYTE_SIZE/512+BOOT_PARTITION_OFFSET))
 #---don't change here---
 
@@ -52,7 +53,7 @@ dd if=/dev/zero of="/${HYPRIOT_IMAGE_NAME}" bs=1MiB count="$((ROOT_PARTITION_SIZ
 echo -e "o\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
 
 # Boot partition
-echo -e "n\np\n1\n${BOOT_PARTITION_OFFSET}\n$((ROOT_PARTITION_OFFSET -1))\np\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+echo -e "n\np\n1\n${BOOT_PARTITION_OFFSET}\n$((ROOT_PARTITION_OFFSET-1))\np\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
 
 # set fat16 for boot partition
 echo -e "t\n6\np\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
