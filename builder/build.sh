@@ -139,13 +139,14 @@ umount -l ${BUILD_PATH}/dev || true
 tar -czf ${IMAGE_ROOTFS_PATH} -C ${BUILD_PATH} .
 
 #---copy rootfs to image file---
-mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}
-mount -t fat16 -o loop=/dev/loop0,offset=${BOOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/media/boot
+mkdir -p "${BUILD_PATH}/root"
+mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root/
+mount -t fat16 -o loop=/dev/loop0,offset=${BOOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root/media/boot
 
 tar -xzf ${IMAGE_ROOTFS_PATH} -C ${BUILD_PATH}
 df -h
-umount ${BUILD_PATH}/media/boot
-umount ${BUILD_PATH}
+umount ${BUILD_PATH}/root/media/boot
+umount ${BUILD_PATH}/root
 #---copy rootfs to image file---
 
 # log image partioning
