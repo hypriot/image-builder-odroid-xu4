@@ -35,8 +35,8 @@ BOOT_PARTITION_OFFSET="3072"
 ROOT_PARTITION_SIZE="800"
 BOOT_PARTITION_SIZE="64"
 #---don't change here---
-BOOT_PARTITION_BYTE_SIZE=$((${BOOT_PARTITION_SIZE}*1024*1024))
-ROOT_PARTITION_OFFSET=$((${BOOT_PARTITION_BYTE_SIZE}/512+${BOOT_PARTITION_OFFSET}))
+BOOT_PARTITION_BYTE_SIZE=$((BOOT_PARTITION_SIZE*1024*1024))
+ROOT_PARTITION_OFFSET=$((BOOT_PARTITION_BYTE_SIZE/512+BOOT_PARTITION_OFFSET))
 #---don't change here---
 
 
@@ -47,7 +47,7 @@ mkdir -p ${BUILD_PATH}/{boot,root}
 #---create image file---
 
 # new size (boot+root)
-dd if=/dev/zero of="/${HYPRIOT_IMAGE_NAME}" bs=1MiB count="$((${ROOT_PARTITION_SIZE}+${BOOT_PARTITION_SIZE}))"
+dd if=/dev/zero of="/${HYPRIOT_IMAGE_NAME}" bs=1MiB count="$((ROOT_PARTITION_SIZE+BOOT_PARTITION_SIZE))"
 
 # create DOS partition Table
 echo -e "o\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
