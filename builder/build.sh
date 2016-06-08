@@ -90,17 +90,15 @@ fdisk -l "/${HYPRIOT_IMAGE_NAME}"
 losetup
 
 #---flash bootloader---
-# download current bootloader/u-boot images from hardkernel
-# (this one is able to boot from a EXT4 file system)
-_commit=814386d3e43b8ab8d81f04aa7fe402952503d8fe
-wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/bl1.bin
-wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/bl2.bin
-wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/u-boot.bin
-wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/tzsw.bin
-dd conv=notrunc if=bl1.bin of="/${HYPRIOT_IMAGE_NAME}" seek=1
-dd conv=notrunc if=bl2.bin of="/${HYPRIOT_IMAGE_NAME}" seek=31
-dd conv=notrunc if=u-boot.bin of="/${HYPRIOT_IMAGE_NAME}" seek=63
-dd conv=notrunc if=tzsw.bin of="/${HYPRIOT_IMAGE_NAME}" seek=719
+wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/bl1.bin.hardkernel
+wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/bl2.bin.hardkernel
+wget -q https://raw.githubusercontent.com/hardkernel/u-boot/odroidxu3-v2012.07/sd_fuse/hardkernel/sd_fusing.sh
+wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/tzsw.bin.hardkernel
+wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/u-boot.bin.hardkernel
+dd conv=notrunc if=bl1.bin.hardkernel of="/${HYPRIOT_IMAGE_NAME}" seek=1
+dd conv=notrunc if=bl2.bin.hardkernel of="/${HYPRIOT_IMAGE_NAME}" seek=31
+dd conv=notrunc if=u-boot.bin.hardkernel of="/${HYPRIOT_IMAGE_NAME}" seek=63
+dd conv=notrunc if=tzsw.bin.hardkernel of="/${HYPRIOT_IMAGE_NAME}" seek=719
 #---flash bootloader---
 
 # download our base root file system
