@@ -55,8 +55,8 @@ echo -e "o\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
 # Boot partition
 echo -e "n\np\n1\n${BOOT_PARTITION_OFFSET}\n$((ROOT_PARTITION_OFFSET-1))\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
 
-# set fat16 for boot partition
-echo -e "t\n6\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+# set fat32 for boot partition
+echo -e "t\nc\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
 
 # new root partition
 echo -e "n\np\n2\n${ROOT_PARTITION_OFFSET}\n\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
