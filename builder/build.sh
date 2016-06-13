@@ -64,7 +64,7 @@ echo -e "n\np\n2\n${ROOT_PARTITION_OFFSET}\n\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAM
 # format boot partition
 losetup -d /dev/loop0 || /bin/true
 losetup --offset $((BOOT_PARTITION_OFFSET*512)) /dev/loop0 "/${HYPRIOT_IMAGE_NAME}"
-mkfs.msdos -F 16 -n HypriotOS /dev/loop0
+mkfs.vfat -n HypriotOS /dev/loop0
 losetup -d /dev/loop0
 sleep 3
 
