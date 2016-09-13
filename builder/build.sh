@@ -30,32 +30,59 @@ HYPRIOT_IMAGE_NAME="hypriotos-odroid-xu4-${HYPRIOT_IMAGE_VERSION}.img"
 IMAGE_ROOTFS_PATH="/image-rootfs.tar.gz"
 export HYPRIOT_IMAGE_VERSION
 
+BOOT_PARTITION_OFFSET="3072"
 # size of root and boot partion (in MByte)
-ROOT_PARTITION_START="3072"
 ROOT_PARTITION_SIZE="800"
+BOOT_PARTITION_SIZE="64"
 #---don't change here---
-ROOT_PARTITION_OFFSET="$((ROOT_PARTITION_START*512))"
+BOOT_PARTITION_BYTE_SIZE=$((BOOT_PARTITION_SIZE*1024*1024))
+ROOT_PARTITION_OFFSET=$((BOOT_PARTITION_BYTE_SIZE/512+BOOT_PARTITION_OFFSET))
 #---don't change here---
+
 
 # create build directory for assembling our image filesystem
 rm -rf ${BUILD_PATH}
-mkdir -p ${BUILD_PATH}/{boot,root}
+mkdir -p ${BUILD_PATH}
 
 #---create image file---
-dd if=/dev/zero of="/${HYPRIOT_IMAGE_NAME}" bs=1MiB count=${ROOT_PARTITION_SIZE}
-echo -e "o\nn\np\n1\n${ROOT_PARTITION_START}\n\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
-#-partition #1 - Type=83 Linux
+
+# new size (boot+root)
+dd if=/dev/zero of="/${HYPRIOT_IMAGE_NAME}" bs=1MiB count="$((ROOT_PARTITION_SIZE+BOOT_PARTITION_SIZE))"
+
+# create DOS partition Table
+echo -e "o\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+
+# Boot partition
+echo -e "n\np\n1\n${BOOT_PARTITION_OFFSET}\n$((ROOT_PARTITION_OFFSET-1))\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+
+# set fat32 for boot partition
+echo -e "t\nc\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+
+# new root partition
+echo -e "n\np\n2\n${ROOT_PARTITION_OFFSET}\n\nw\n" | fdisk "/${HYPRIOT_IMAGE_NAME}"
+
+# format boot partition
 losetup -d /dev/loop0 || /bin/true
-losetup --offset ${ROOT_PARTITION_OFFSET} /dev/loop0 "/${HYPRIOT_IMAGE_NAME}"
-mkfs.ext4 -O ^has_journal -b 4096 -L rootfs -U e139ce78-9841-40fe-8823-96a304a09859 /dev/loop0
+losetup --offset $((BOOT_PARTITION_OFFSET*512)) /dev/loop0 "/${HYPRIOT_IMAGE_NAME}"
+mkfs.vfat -n HypriotOS /dev/loop0
 losetup -d /dev/loop0
 sleep 3
+
+# format root partition
+#-partition #1 - Type=83 Linux
+losetup -d /dev/loop0 || /bin/true
+losetup --offset $((ROOT_PARTITION_OFFSET*512)) /dev/loop0 "/${HYPRIOT_IMAGE_NAME}"
+mkfs.ext4 -O ^has_journal -b 4096 -i 4096 -L root -U e139ce78-9841-40fe-8823-96a304a09859 /dev/loop0
+losetup -d /dev/loop0
+sleep 3
+
+
 #-test mount and write a file
-mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root
-echo "HypriotOS: root partition" > ${BUILD_PATH}/root/root.txt
+mount -t ext4 -o loop=/dev/loop0,offset=$((ROOT_PARTITION_OFFSET*512)) "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}
+echo "HypriotOS: root partition" > ${BUILD_PATH}/root.txt
 tree -a ${BUILD_PATH}/
 df -h
-umount ${BUILD_PATH}/root
+umount ${BUILD_PATH}
 #---create image file---
 
 # log image partioning
@@ -63,17 +90,15 @@ fdisk -l "/${HYPRIOT_IMAGE_NAME}"
 losetup
 
 #---flash bootloader---
-# download current bootloader/u-boot images from hardkernel
-# (this one is able to boot from a EXT4 file system)
-_commit=814386d3e43b8ab8d81f04aa7fe402952503d8fe
-wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/bl1.bin
-wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/bl2.bin
-wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/u-boot.bin
-wget -q https://github.com/hardkernel/linux/raw/${_commit}/tools/hardkernel/prebuilt_uboot/tzsw.bin
-dd conv=notrunc if=bl1.bin of="/${HYPRIOT_IMAGE_NAME}" seek=1
-dd conv=notrunc if=bl2.bin of="/${HYPRIOT_IMAGE_NAME}" seek=31
-dd conv=notrunc if=u-boot.bin of="/${HYPRIOT_IMAGE_NAME}" seek=63
-dd conv=notrunc if=tzsw.bin of="/${HYPRIOT_IMAGE_NAME}" seek=719
+wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/bl1.bin.hardkernel
+wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/bl2.bin.hardkernel
+wget -q https://raw.githubusercontent.com/hardkernel/u-boot/odroidxu3-v2012.07/sd_fuse/hardkernel/sd_fusing.sh
+wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/tzsw.bin.hardkernel
+wget -q https://github.com/hardkernel/u-boot/raw/odroidxu3-v2012.07/sd_fuse/hardkernel/u-boot.bin.hardkernel
+dd conv=notrunc if=bl1.bin.hardkernel of="/${HYPRIOT_IMAGE_NAME}" seek=1
+dd conv=notrunc if=bl2.bin.hardkernel of="/${HYPRIOT_IMAGE_NAME}" seek=31
+dd conv=notrunc if=u-boot.bin.hardkernel of="/${HYPRIOT_IMAGE_NAME}" seek=63
+dd conv=notrunc if=tzsw.bin.hardkernel of="/${HYPRIOT_IMAGE_NAME}" seek=719
 #---flash bootloader---
 
 # download our base root file system
@@ -88,7 +113,7 @@ tar -xzf "${ROOTFS_TAR_PATH}" -C ${BUILD_PATH}
 update-binfmts --enable qemu-arm
 
 # set up mount points for pseudo filesystems
-mkdir -p ${BUILD_PATH}/{proc,sys,dev/pts}
+mkdir -p ${BUILD_PATH}/{proc,sys,dev/pts,media/boot}
 
 mount -o bind /dev ${BUILD_PATH}/dev
 mount -o bind /dev/pts ${BUILD_PATH}/dev/pts
@@ -112,9 +137,14 @@ umount -l ${BUILD_PATH}/dev || true
 tar -czf ${IMAGE_ROOTFS_PATH} -C ${BUILD_PATH} .
 
 #---copy rootfs to image file---
-mount -t ext4 -o loop=/dev/loop0,offset=${ROOT_PARTITION_OFFSET} "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root
+mkdir -p "${BUILD_PATH}/root"
+mount -t ext4 -o loop=/dev/loop0,offset=$((ROOT_PARTITION_OFFSET*512)) "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root
+mkdir -p "${BUILD_PATH}/root/media/boot"
+mount -t vfat -o loop=/dev/loop1,offset=$((BOOT_PARTITION_OFFSET*512)) "/${HYPRIOT_IMAGE_NAME}" ${BUILD_PATH}/root/media/boot
+
 tar -xzf ${IMAGE_ROOTFS_PATH} -C ${BUILD_PATH}/root
 df -h
+umount ${BUILD_PATH}/root/media/boot
 umount ${BUILD_PATH}/root
 #---copy rootfs to image file---
 
